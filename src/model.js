@@ -42,3 +42,40 @@ export function pathsFrom(project,selected){
 }
 export function connectedWires(project,id){return project.wires.filter(w=>w.from===id||w.to===id)}
 export function exportWireSchedule(project){const rows=[['Wire','From tag','From terminal','To tag','To terminal','Circuit','Description']];for(const w of project.wires)rows.push([w.id,w.from,w.fromTerminal,w.to,w.toTerminal,w.kind,w.label]);return rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n')}
+
+/** Device-to-device *documented links*, not electrical continuity. */
+export function traceLinks(project,selected,{scope='direct',direction='both',kinds=['AC','DC','SIGNAL','ETHERNET']}={}){
+ const nodes=new Set(project.parts.some(p=>p.id===selected)?[selected]:[]),links=new Map(),allowed=new Set(kinds);
+ const queue=nodes.size?[selected]:[];
+ while(queue.length){const id=queue.shift();for(const wire of project.wires){
+  if(!allowed.has(wire.kind))continue;
+  const forward=wire.from===id&&direction!=='upstream',backward=wire.to===id&&direction!=='downstream';
+  if(!forward&&!backward)continue;
+  const next=forward?wire.to:wire.from;links.set(wire.id,wire);
+  if(!nodes.has(next)){nodes.add(next);if(scope==='group')queue.push(next)}
+ }}
+ return {devices:[...nodes],wires:[...links.values()]};
+}
+/** Reject untrusted/incomplete imports before replacing saved project data. */
+export function validateImportedProject(p){
+ const fail=s=>{throw Error(s)};
+ const str=(v,max=500)=>typeof v==='string'&&v.length>0&&v.length<=max;
+ if(!p||p.schemaVersion!==1||!Array.isArray(p.parts)||!Array.isArray(p.wires))fail('Unsupported project format');
+ if(!str(p.title,300)||p.parts.length>2000||p.wires.length>10000)fail('Invalid project metadata or excessive project size');
+ const ids=new Set(),wireIds=new Set();
+ for(const part of p.parts){
+  if(!part||!str(part.id,80)||ids.has(part.id))fail('Duplicate or missing component ID');
+  ids.add(part.id);
+  for(const key of ['name','type','voltage','current','purpose','zone'])if(!str(part[key]))fail('Invalid component field '+key);
+  if(!['x','y','w','h'].every(k=>typeof part[k]==='number'&&Number.isFinite(part[k]))||part.x<0||part.y<0||part.w<=0||part.h<=0||part.x+part.w>1100||part.y+part.h>640)fail('Invalid component geometry '+part.id);
+  if(!Array.isArray(part.terminal)||part.terminal.length>200||new Set(part.terminal).size!==part.terminal.length||!part.terminal.every(t=>str(t,80)))fail('Invalid component terminals '+part.id);
+ }
+ for(const wire of p.wires){
+  if(!wire||!str(wire.id,80)||wireIds.has(wire.id))fail('Duplicate or missing wire ID');
+  wireIds.add(wire.id);
+  if(!['AC','DC','SIGNAL','ETHERNET'].includes(wire.kind)||!str(wire.label))fail('Invalid wire kind/label');
+  const a=p.parts.find(x=>x.id===wire.from),b=p.parts.find(x=>x.id===wire.to);
+  if(!a||!b||!a.terminal.includes(wire.fromTerminal)||!b.terminal.includes(wire.toTerminal))fail('Unknown component or terminal for wire '+wire.id);
+ }
+ return p;
+}
