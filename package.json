@@ -1,0 +1,12 @@
+{
+  "name": "control-panel-designer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "npm test && node --check src/app.js && node --check src/model.js && node --check server.mjs"
+  },
+  "engines": {"node": ">=20"}
+}
