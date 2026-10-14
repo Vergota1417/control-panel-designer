@@ -20,11 +20,11 @@ You are building a deterministic, local-first industrial control-panel engineeri
 3. Run `npm run check`, document pass/fail.
 4. Demonstrate no loss of wire endpoints when a component moves.
 5. Treat any safety-critical output as unverified until an authorized engineer checks it.
-6. Never self-merge a PR. Request human approval for safety-related changes.
+6. Routine UI, documentation, and non-engineering bugfixes explicitly authorized by the owner can be merged only after all required CI and browser checks pass. Never auto-merge unknown contributions, and always request qualified review of engineering rules, electrical safety or construction-ready outputs.
 
 ## Next tasks in priority order
 1. Add robust JSON schema versioning and import validation (reject malformed coordinates/IDs/XSS data).
-2. Add connector port anchors and rerender wires smoothly while dragging.
+2. Improve connector port anchors and update wire geometry smoothly during dragging (basic motion is implemented).
 3. Add panel configuration with bounds, rail geometry and snap-to-grid.
 4. Add component catalog metadata and human-managed verification status.
 5. Add a connection-focused expandable tree, upstream/downstream tracing and net semantics; a switch or relay must not be treated as uninterrupted continuity.
