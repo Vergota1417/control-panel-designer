@@ -1,3 +1,5 @@
 # Terminal Explorer
 
-A planned read-only sidebar for documented terminal-to-terminal wiring. It must not imply electrical continuity or construction readiness.
+The read-only terminal adjacency module groups documented wires by exact device terminal. This is not electrical continuity, energized current flow, or construction readiness.
+
+The interactive sidebar and navigation are not yet implemented. Do not mark issue #3 complete until a user-visible explorer and browser interaction tests are verified.
