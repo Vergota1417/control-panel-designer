@@ -1,4 +1,5 @@
-import {initialProject,validate,connectedWires,exportWireSchedule,traceLinks,validateImportedProject} from './model.js';
+import {initialProject,validate,exportWireSchedule,traceLinks,validateImportedProject} from './model.js';
+import {terminalConnections} from './terminal-explorer.js';
 
 const KEY='control-panel-designer-v1',W=1100,H=640,NS='http://www.w3.org/2000/svg';
 const el=id=>document.getElementById(id);
